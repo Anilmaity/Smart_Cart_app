@@ -5,7 +5,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import BarcodeScan from './BarcodeScan';
 import HomeScreen from './HomeScreen';
 import AddItems from './AddItems';
-import Getbarcodeinfo from './Getbarcodeinfo';
+import Cart_list from "./Cart_list";
 
 import {NavigationContainer} from '@react-navigation/native';
 import Orientation from 'react-native-orientation-locker';
@@ -54,7 +54,9 @@ export class Home extends Component {
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="BarcodeScan" component={BarcodeScan} />
           <Tab.Screen name="AddItems" component={AddItems} />
-          <Tab.Screen name="getbarcodeinfo" component={Getbarcodeinfo} />
+          <Tab.Screen name="Cart_list" component={Cart_list} />
+
+
         </Tab.Navigator>
       </NavigationContainer>
     );

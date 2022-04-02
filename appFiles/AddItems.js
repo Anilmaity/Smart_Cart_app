@@ -17,6 +17,8 @@ import {
 } from 'react-native';
 
 import axios from 'axios';
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import {RNCamera} from 'react-native-camera';
 
 const testapi = axios.create({
   baseURL: 'http://aa15-2401-4900-50a6-c0ef-f958-c9be-6321-91d8.ngrok.io/',
@@ -25,6 +27,33 @@ const testapi = axios.create({
     'Content-type': 'multipart/form-data',
   },
 });
+
+
+import {PermissionsAndroid, SafeAreaView, StatusBar} from 'react-native';
+
+const requestCameraPermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      {
+        title: 'Cool Photo App Camera Permission',
+        message:
+          'Cool Photo App needs access to your camera ' +
+          'so you can take awesome pictures.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can use the camera');
+    } else {
+      console.log('Camera permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
 
 export class AddItems extends Component {
   constructor(props) {
@@ -48,6 +77,28 @@ export class AddItems extends Component {
     this.handleManufacturer = this.handleManufacturer.bind(this);
     this.handleWeight = this.handleWeight.bind(this);
   }
+
+  barcodeReceived = async e => {
+    console.log('Barcode: ' + e.data);
+    console.log('Type: ' + e.type);
+    this.setState({ItemBarcodeType: e.type, ItemBarcode: e.data});
+  };
+
+  camera = () => {
+    requestCameraPermission;
+    this.setState({cameraview: !this.state.cameraview});
+  };
+
+  light = () => {
+    requestCameraPermission;
+    this.setState({light: !this.state.light});
+
+    if (this.state.torchMode == 'off') {
+      this.setState({torchMode: 'on'});
+    } else {
+      this.setState({torchMode: 'off'});
+    }
+  };
 
   handleItemName(event) {
     console.log(event);
@@ -127,10 +178,70 @@ export class AddItems extends Component {
   }
 
   render() {
+    let cameraview = [];
+    if (this.state.cameraview == true) {
+      cameraview.push(
+        <View
+          key={'62'}
+          style={{flex: 1, alignContent: 'center', justifyContent: 'center'}}>
+          <QRCodeScanner
+            onRead={this.barcodeReceived}
+            flashMode={RNCamera.Constants.FlashMode.torch}
+            markerStyle={{
+              alignSelf: 'center',
+              height: 200,
+              width: 200,
+              opacity: 0.5,
+              borderColor: 'black',
+            }}
+            cameraStyle={{alignSelf: 'center', height: '95%', width: '90%'}}
+            showMarker={true}
+            key={'98'}
+          />
+        </View>,
+      );
+    } else {
+      cameraview.push(
+        <View
+          style={{flex: 1, backgroundColor: 'white', justifyContent: 'center'}}>
+          <Text style={{textAlign: 'center', fontSize: 36}}>Camera is Off</Text>
+        </View>,
+      );
+    }
+
     return (
-      <View style={{flex: 1, borderWidth: 5, borderColor: 'red'}}>
+
+      <View style={{flex: 1, flexDirection:"row", borderWidth: 5, borderColor: 'red'}}>
+        <View style={{flex: 1}}>
+
+          <View style={{height: '10%', width: '100%', flexDirection: 'row'}}>
+            <Button
+              buttonStyle={{flex: 3, width: '90%'}}
+              title={
+                this.state.cameraview ? 'Turn off Camera' : 'Turn on Camera'
+              }
+              onPress={this.camera}
+            />
+
+            <Button
+              buttonStyle={{
+                flex: 1,
+                borderRadius: 20,
+                backgroundColor: this.state.light ? 'black' : 'grey',
+                width: '70%',
+              }}
+              title={this.state.light ? 'backlight off' : 'backlight on'}
+              onPress={this.light}
+            />
+          </View>
+
+          {cameraview}
+        </View>
+
+
         <View
           style={{
+            flex: 1,
             height: '100%',
             paddingHorizontal: 0,
             paddingBottom: 50,
@@ -234,7 +345,7 @@ export class AddItems extends Component {
                   fontSize: 15,
                   color: 'white',
                 }}
-                placeholder="ItemBarcode_Type"
+                placeholder={this.state.ItemBarcodeType}
                 placeholderTextColor={'white'}
                 // secureTextEntry={passType}
                 onChangeText={this.handleBarcodeType}
@@ -266,7 +377,7 @@ export class AddItems extends Component {
                   fontSize: 15,
                   color: 'white',
                 }}
-                placeholder="ItemBarcodenumber"
+                placeholder={this.state.ItemBarcode}
                 placeholderTextColor={'white'}
                 // secureTextEntry={passType}
                 onChangeText={this.handleBarcode}

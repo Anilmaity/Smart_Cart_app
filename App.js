@@ -12,7 +12,7 @@ import Home from './appFiles/Home';
 import Login from './appFiles/login';
 
 const App: () => Node = () => {
-  return <Login />;
+  return <Home />;
 };
 
 export default App;

@@ -76,15 +76,17 @@ export class Login extends Component {
       <View
         style={{
           flex: 1,
+          justifyContent: 'center',
           borderColor: '#46e16a',
         }}>
         <View
           style={{
+            height:"25%",
             backgroundColor: '#2a2727',
             paddingHorizontal: 0,
             paddingBottom: 0,
           }}>
-          <View style={styles.Text}>
+          <View style={styles.Input}>
             <Text
               style={{
                 fontWeight: 'bold',
@@ -104,9 +106,22 @@ export class Login extends Component {
               textAlign: 'center',
               fontSize: 26,
               color: 'black',
+              width: '30%',
             }}>
             Cart Number :
           </Text>
+
+          <TextInput
+            style={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              fontSize: 26,
+              color: 'black',
+              borderWidth: 1,
+              borderRadius: 25,
+              width: '70%',
+            }}
+          />
         </View>
 
         <View style={styles.Input}>
@@ -116,6 +131,7 @@ export class Login extends Component {
               textAlign: 'center',
               fontSize: 26,
               color: 'black',
+              width: '30%',
             }}>
             Password :
           </Text>
@@ -125,10 +141,26 @@ export class Login extends Component {
               fontWeight: 'bold',
               textAlign: 'center',
               fontSize: 26,
-              color: 'white',
+              color: 'black',
+              borderWidth: 1,
+              width: '70%',
+              borderRadius: 25,
             }}
           />
         </View>
+
+        <Button
+          buttonStyle={{
+            borderWidth: 5,
+            width: '30%',
+            flexDirection: 'row',
+            alignSelf: 'center',
+            borderRadius: 25,
+            padding: 15,
+            borderColor: 'grey',
+          }}
+          title={'login'}
+        />
       </View>
     );
   }
@@ -164,13 +196,15 @@ const styles = StyleSheet.create({
   },
 
   Input: {
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 18,
     borderWidth: 1,
     width: '80%',
-    height: '15%',
+    height: '25%',
+    flex: 0.8,
     flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    borderRadius: 25,
+    padding: 24,
   },
 });
 
