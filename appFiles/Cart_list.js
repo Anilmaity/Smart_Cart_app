@@ -42,6 +42,7 @@ export class Cart_list extends Component {
           containerStyle={{
             backgroundColor: '#4d363c',
             borderRadius: 5,
+            height: 100,
           }}
           style={{
             marginVertical: 0,
@@ -52,7 +53,10 @@ export class Cart_list extends Component {
           key={index}
           bottomDivider>
           <ListItem.Content style={{}}>
-            <View style={{flexDirection: 'row'}}>
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
               <View
                 style={{
                   height: '100%',
@@ -60,7 +64,9 @@ export class Cart_list extends Component {
 
                   justifyContent: 'center',
                 }}>
-                <Text style={{color: 'white', textAlign: 'left'}}>{index+1}</Text>
+                <Text style={{color: 'white', textAlign: 'left'}}>
+                  {index + 1}
+                </Text>
               </View>
 
               <View
@@ -99,17 +105,14 @@ export class Cart_list extends Component {
                     width: '30%',
 
                     justifyContent: 'center',
-                    alignItems:"center",
-
+                    alignItems: 'center',
                   }}>
-
                   <Icon
                     name="circle"
                     type="material"
-                    style={{marginStart:100}}
+                    style={{marginStart: 100}}
                     color={cart.in_use ? 'green' : 'red'}
                   />
-
                 </View>
               </View>
             </View>

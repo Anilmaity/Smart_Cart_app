@@ -28,7 +28,6 @@ const testapi = axios.create({
   },
 });
 
-
 import {PermissionsAndroid, SafeAreaView, StatusBar} from 'react-native';
 
 const requestCameraPermission = async () => {
@@ -59,12 +58,14 @@ export class AddItems extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      torchMode: 'on',
+      torchMode: 'off',
+      light:false,
       cameraType: 'back',
       Itemname: '',
       Itemprice: '',
-      ItemBarcode: '',
-      ItemBarcodeType: '',
+      Itemdiscount:'0.00 to 1.00',
+      ItemBarcode: 'ItemBarcode',
+      ItemBarcodeType: 'ItemBarcodeType',
       ItemManufacturer: '',
       Weight: '',
       ItemWeight: '',
@@ -76,6 +77,8 @@ export class AddItems extends Component {
     this.handleBarcodeType = this.handleBarcodeType.bind(this);
     this.handleManufacturer = this.handleManufacturer.bind(this);
     this.handleWeight = this.handleWeight.bind(this);
+    this.handlediscount = this.handlediscount.bind(this);
+
   }
 
   barcodeReceived = async e => {
@@ -95,8 +98,11 @@ export class AddItems extends Component {
 
     if (this.state.torchMode == 'off') {
       this.setState({torchMode: 'on'});
+      console.log("light on")
     } else {
       this.setState({torchMode: 'off'});
+      console.log("light off")
+
     }
   };
 
@@ -113,6 +119,10 @@ export class AddItems extends Component {
   handleBarcode(event) {
     console.log(event);
     this.setState({ItemBarcode: event});
+  }
+  handlediscount(event) {
+    console.log(event);
+    this.setState({Itemdiscount: event});
   }
 
   handleBarcodeType(event) {
@@ -148,6 +158,8 @@ export class AddItems extends Component {
         form.append('description', '');
         form.append('category', '');
         form.append('weight', this.state.ItemWeight);
+        form.append('discount', this.state.Itemdiscount);
+
 
         console.log(form);
 
@@ -186,7 +198,7 @@ export class AddItems extends Component {
           style={{flex: 1, alignContent: 'center', justifyContent: 'center'}}>
           <QRCodeScanner
             onRead={this.barcodeReceived}
-            flashMode={RNCamera.Constants.FlashMode.torch}
+            flashMode={this.state.light? RNCamera.Constants.FlashMode.torch:RNCamera.Constants.FlashMode.off }
             markerStyle={{
               alignSelf: 'center',
               height: 200,
@@ -210,10 +222,14 @@ export class AddItems extends Component {
     }
 
     return (
-
-      <View style={{flex: 1, flexDirection:"row", borderWidth: 5, borderColor: 'red'}}>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          borderWidth: 5,
+          borderColor: 'red',
+        }}>
         <View style={{flex: 1}}>
-
           <View style={{height: '10%', width: '100%', flexDirection: 'row'}}>
             <Button
               buttonStyle={{flex: 3, width: '90%'}}
@@ -237,7 +253,6 @@ export class AddItems extends Component {
 
           {cameraview}
         </View>
-
 
         <View
           style={{
@@ -343,13 +358,14 @@ export class AddItems extends Component {
                   borderRadius: 15,
                   borderWidth: 1,
                   fontSize: 15,
-                  color: 'white',
+                  color: 'black',
                 }}
-                placeholder={this.state.ItemBarcodeType}
+                //placeholder={}
+                defaultValue={this.state.ItemBarcodeType}
                 placeholderTextColor={'white'}
                 // secureTextEntry={passType}
                 onChangeText={this.handleBarcodeType}
-                // onEndEditing={lastEditedText}
+                // onEndEditing={this.handleBarcodeType}
                 // maxLength={maximumLength}
                 // keyboardType={keyboardType}
               />
@@ -377,13 +393,46 @@ export class AddItems extends Component {
                   fontSize: 15,
                   color: 'white',
                 }}
-                placeholder={this.state.ItemBarcode}
+                //placeholder={this.state.ItemBarcode}
+                defaultValue={this.state.ItemBarcode}
+
                 placeholderTextColor={'white'}
                 // secureTextEntry={passType}
                 onChangeText={this.handleBarcode}
                 // onEndEditing={lastEditedText}
                 // maxLength={maximumLength}
                 // keyboardType={keyboardType}
+              />
+            </View>
+            <View
+              style={{flexDirection: 'row', marginBottom: 25, width: '100%'}}>
+              <Text
+                style={{
+                  width: '20%',
+                  textAlignVertical: 'center',
+                  fontSize: 15,
+                  marginBottom: 10,
+                  paddingLeft: 10,
+                  color: 'white',
+                }}>
+                * discount
+              </Text>
+              <TextInput
+                style={{
+                  width: '80%',
+                  padding: 10,
+                  borderRadius: 15,
+                  borderWidth: 1,
+                  fontSize: 15,
+                  color: 'white',
+                }}
+                placeholder={"0 to 1"}
+                placeholderTextColor={'white'}
+                // secureTextEntry={passType}
+                onChangeText={this.handlediscount}
+                // onEndEditing={lastEditedText}
+                // maxLength={maximumLength}
+                keyboardType={"number-pad"}
               />
             </View>
             <View
