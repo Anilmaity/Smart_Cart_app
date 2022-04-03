@@ -19,6 +19,8 @@ import {Button, Icon, ListItem} from 'react-native-elements';
 
 import {
   Alert,
+  AsyncStorage,
+  BackHandler,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,6 +30,7 @@ import {
 import {PermissionsAndroid, SafeAreaView, StatusBar} from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import {RNCamera} from 'react-native-camera';
+import FormData from 'form-data';
 
 const requestCameraPermission = async () => {
   try {
@@ -61,6 +64,7 @@ export class BarcodeScan extends Component {
       light: false,
       cameraType: 'back',
       cameraview: false,
+      Cart_number:'',
 
       itemlist: [
         {
@@ -68,27 +72,88 @@ export class BarcodeScan extends Component {
           barcodeType: 'EAN_13',
           name: 'dummy',
           price: 5,
+          discount: 0.2,
         },
-
       ],
       databaseitemlist: [],
       Processing: false,
 
       selectedorder: {},
       Total: 0,
+      Totaldiscount: 0,
       TotalItem: 0,
     };
   }
 
+
+  retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('Cart_id');
+
+      if (value != null) {
+        // We have data!!
+        this.setState({Cart_number: value});
+        this.login(false);
+      }
+    } catch (error) {
+      console.log(error);
+      console.log('Cant find name');
+      // Error retrieving data
+    }
+  };
+
+  logout = async () => {
+    let itemlist = [];
+
+    let form = new FormData();
+    form.append('cart_token', this.state.Cart_number);
+    console.log(form);
+    try {
+      let Response = await base_api.post('/Cart_logout/', form);
+
+      console.log(Response.data);
+      if (Response.data.Status == 'logout successful') {
+
+        BackHandler.exitApp()
+
+
+      }
+    } catch (err) {
+      console.log(err);
+      alert('their ia an error while getting items!');
+    }
+  };
+
+  handleBackButton = async (list) => {
+    console.log('back press');
+
+    this.logout()
+
+    return false
+  };
+
   componentDidMount() {
+    this.retrieveData();
     this.getitemlist();
+    BackHandler.addEventListener(
+      'hardwareBackPress',
+      this.handleBackButton.bind(this),
+    );
 
     let order = this.state.itemlist;
     let Total = 0;
+    let Totaldiscount = 0;
     for (let i = 0; i < order.length; i++) {
       Total = Total + order[i].price;
+      Totaldiscount = Totaldiscount + order[i].price * order[i].discount;
     }
-    this.setState({Total: Total});
+    this.setState({Total: Total, Totaldiscount: Totaldiscount});
+  }
+
+  componentWillUnmount() {
+
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
+
   }
 
   getitem(id, type) {
@@ -192,6 +257,12 @@ export class BarcodeScan extends Component {
     }
   };
 
+  removeback = async ()=>{
+    console.log("remove back");
+    console.log(BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton));
+
+  }
+
   render() {
     let orderlist = [];
 
@@ -231,7 +302,7 @@ export class BarcodeScan extends Component {
                 </Text>
               </View>
 
-              <View style={{height: '100%', width: '65%'}}>
+              <View style={{height: '100%', width: '30%'}}>
                 <Text
                   style={{
                     color: 'black',
@@ -242,15 +313,38 @@ export class BarcodeScan extends Component {
                 </Text>
               </View>
 
+              <View style={{height: '100%', width: '30%'}}>
+                <Text
+                  style={{
+                    color: 'black',
+                    marginStart: 10,
+                    textAlign: 'center',
+                  }}>
+                  {item.price}
+                </Text>
+              </View>
+
               <View
                 style={{
                   height: '100%',
-                  width: '25%',
+                  width: '20%',
 
                   justifyContent: 'center',
                 }}>
                 <Text style={{color: 'black', textAlign: 'center'}}>
-                  {item.price} Rs
+                  {parseFloat(item.discount) * item.price}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  height: '100%',
+                  width: '20%',
+
+                  justifyContent: 'center',
+                }}>
+                <Text style={{color: 'black', textAlign: 'center'}}>
+                  {item.price - item.discount * item.price} Rs
                 </Text>
               </View>
             </View>
@@ -281,7 +375,7 @@ export class BarcodeScan extends Component {
             }}
             cameraStyle={{alignSelf: 'center', height: '93%', width: '90%'}}
             showMarker={true}
-            key={'60'}
+            key={'70'}
           />
         </View>,
       );
@@ -289,7 +383,9 @@ export class BarcodeScan extends Component {
       cameraview.push(
         <View
           style={{flex: 1, backgroundColor: 'white', justifyContent: 'center'}}>
-          <Text style={{textAlign: 'center', color:"black", fontSize: 36}}>Camera is Off</Text>
+          <Text style={{textAlign: 'center', color: 'black', fontSize: 36}}>
+            Camera is Off
+          </Text>
         </View>,
       );
     }
@@ -324,19 +420,23 @@ export class BarcodeScan extends Component {
         <View style={{flex: 1, marginBottom: '8%'}}>
           <View
             style={{
-              height: '10%',
+              height: '15%',
               backgroundColor: 'black',
+              flexDirection:'row',
             }}>
             <Text
               style={{
-                alignItems: 'center',
                 textAlign: 'center',
+                alignSelf:"center",
                 fontSize: 20,
+                width:"80%",
                 color: 'white',
                 fontWeight: 'bold',
               }}>
               Orderlist
             </Text>
+
+
           </View>
 
           <View style={{flexDirection: 'row'}}>
@@ -356,7 +456,7 @@ export class BarcodeScan extends Component {
                 <Text style={{color: 'black', textAlign: 'center'}}>Sr.No</Text>
               </View>
 
-              <View style={{height: '100%', width: '65%'}}>
+              <View style={{height: '100%', width: '30%'}}>
                 <Text
                   style={{
                     color: 'black',
@@ -370,11 +470,33 @@ export class BarcodeScan extends Component {
               <View
                 style={{
                   height: '100%',
-                  width: '25%',
+                  width: '20%',
 
                   justifyContent: 'center',
                 }}>
                 <Text style={{color: 'black', textAlign: 'center'}}>Price</Text>
+              </View>
+
+              <View
+                style={{
+                  height: '100%',
+                  width: '20%',
+
+                  justifyContent: 'center',
+                }}>
+                <Text style={{color: 'black', textAlign: 'center'}}>
+                  discount
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  height: '100%',
+                  width: '20%',
+
+                  justifyContent: 'center',
+                }}>
+                <Text style={{color: 'black', textAlign: 'center'}}>Cost</Text>
               </View>
             </View>
           </View>
@@ -397,7 +519,7 @@ export class BarcodeScan extends Component {
             <View style={{flex: 1, flexDirection: 'row'}}>
               <Text
                 style={{
-                  width: '20%',
+                  width: '15%',
                   fontSize: 16,
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -410,7 +532,19 @@ export class BarcodeScan extends Component {
 
               <Text
                 style={{
-                  width: '45%',
+                  width: '30%',
+                  fontSize: 16,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'green',
+                  textAlign: 'center',
+                  color: 'white',
+                }}
+              />
+
+              <Text
+                style={{
+                  width: '20%',
                   fontSize: 16,
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -418,18 +552,29 @@ export class BarcodeScan extends Component {
                   textAlign: 'center',
                   color: 'white',
                 }}>
-                Total
+                {this.state.Total}
               </Text>
 
               <Text
                 style={{
-                  width: '35%',
+                  width: '20%',
                   alignItems: 'center',
                   backgroundColor: 'green',
                   textAlign: 'center',
                   color: 'white',
                 }}>
-                {this.state.Total} Rs
+                {this.state.Totaldiscount} Rs
+              </Text>
+
+              <Text
+                style={{
+                  width: '20%',
+                  alignItems: 'center',
+                  backgroundColor: 'green',
+                  textAlign: 'center',
+                  color: 'white',
+                }}>
+                {this.state.Total - this.state.Totaldiscount} Rs
               </Text>
             </View>
 
@@ -452,7 +597,8 @@ export class BarcodeScan extends Component {
                   height: 40,
                 }}
                 onPress={() => {
-                  console.log('pressed');
+                  this.removeback()
+                  this.props.navigation.navigate('Bill', this.state.itemlist);
                 }}
               />
             </View>

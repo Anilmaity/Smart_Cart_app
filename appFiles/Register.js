@@ -7,18 +7,16 @@ import {baseAPI} from './General_files/Base_Api';
 const base_api = baseAPI;
 
 import {
-  AsyncStorage,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  ToastAndroid,
   View,
 } from 'react-native';
 import FormData from 'form-data';
 
-export class Login extends Component {
+export class Register extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -27,6 +25,7 @@ export class Login extends Component {
       databaseitemlist: [],
       password: '',
       Cart_number: '',
+      current_user: '',
       itemlist: [
         {
           barcodedata: '8906010501488',
@@ -39,61 +38,25 @@ export class Login extends Component {
 
     this.handlepassword = this.handlepassword.bind(this);
     this.handleCart_number = this.handleCart_number.bind(this);
-  }
-  componentDidMount() {
-    this.retrieveData();
+    this.handlecurrent_user = this.handlecurrent_user.bind(this);
   }
 
-  retrieveData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('Cart_id');
-
-      if (value != null) {
-        // We have data!!
-        this.setState({Cart_number: value});
-        this.login(false);
-      }
-    } catch (error) {
-      console.log(error);
-      console.log('Cant find name');
-      // Error retrieving data
-    }
-  };
-
-  login = async (manual) => {
+  Register = async () => {
     let itemlist = [];
 
     let form = new FormData();
     form.append('cart_token', this.state.Cart_number);
+    form.append('current_user', this.state.current_user);
+    form.append('cart_id', this.state.Cart_number);
+    form.append('password', this.state.password);
+
     console.log(form);
     try {
-      let Response = await base_api.post('/Cart_login/', form);
+      let Response = await base_api.post('/Cart_form/', form);
 
       console.log(Response.data);
-      if (Response.data.Status == 'Login successful') {
-        if (manual == true) {
-          try {
-            await AsyncStorage.setItem('Cart_id', this.state.Cart_number);
-
-            this.props.navigation.navigate('Home');
-
-          } catch (error) {
-            // Error saving data
-            console.log(error);
-            console.log('there is an issue in loggin in');
-          }
-        }
-
-        else
-        {
-          this.props.navigation.navigate('Home');
-
-        }
-      } else if (Response.data.Status == 'Cart is in use') {
-        ToastAndroid.show(
-          'Please use different account its already in use',
-          ToastAndroid.SHORT,
-        );
+      if (Response.data[0].Status == 'Cart added sucessfully') {
+        this.props.navigation.navigate('Home');
       }
     } catch (err) {
       console.log(err);
@@ -103,6 +66,10 @@ export class Login extends Component {
 
   handlepassword(e) {
     this.setState({password: e});
+  }
+
+  handlecurrent_user(e) {
+    this.setState({current_user: e});
   }
 
   handleCart_number(e) {
@@ -161,30 +128,54 @@ export class Login extends Component {
           />
         </View>
 
-        {/*<View style={styles.Input}>*/}
-        {/*  <Text*/}
-        {/*    style={{*/}
-        {/*      fontWeight: 'bold',*/}
-        {/*      textAlign: 'center',*/}
-        {/*      fontSize: 26,*/}
-        {/*      width: '30%',*/}
-        {/*      color: 'blue',*/}
-        {/*    }}>*/}
-        {/*    Password :*/}
-        {/*  </Text>*/}
+        <View style={styles.Input}>
+          <Text
+            style={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              fontSize: 26,
+              width: '30%',
+              color: 'blue',
+            }}>
+            Password :
+          </Text>
 
-        {/*  <TextInput*/}
-        {/*    style={{*/}
-        {/*      fontWeight: 'bold',*/}
-        {/*      textAlign: 'center',*/}
-        {/*      fontSize: 26,*/}
-        {/*      width: '70%',*/}
-        {/*      borderWidth: 2,*/}
-        {/*      color: 'black',*/}
-        {/*    }}*/}
-        {/*    onChangeText={this.handlepassword}*/}
-        {/*  />*/}
-        {/*</View>*/}
+          <TextInput
+            style={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              fontSize: 26,
+              width: '70%',
+              borderWidth: 2,
+              color: 'black',
+            }}
+            onChangeText={this.handlepassword}
+          />
+        </View>
+        <View style={styles.Input}>
+          <Text
+            style={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              fontSize: 26,
+              width: '30%',
+              color: 'blue',
+            }}>
+            current_user :
+          </Text>
+
+          <TextInput
+            style={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              fontSize: 26,
+              width: '70%',
+              borderWidth: 2,
+              color: 'black',
+            }}
+            onChangeText={this.handlecurrent_user}
+          />
+        </View>
 
         <View style={{height: '30%'}}>
           <Button
@@ -193,25 +184,9 @@ export class Login extends Component {
               width: '30%',
               alignSelf: 'center',
               borderRadius: 15,
-              marginBottom: 25,
-            }}
-            title={'login'}
-            onPress={() => {
-              this.login(true);
-            }}
-          />
-
-          <Button
-            buttonStyle={{
-              borderWidth: 2,
-              width: '30%',
-              alignSelf: 'center',
-              borderRadius: 15,
             }}
             title={'Register'}
-            onPress={() => {
-              this.props.navigation.navigate('Register');
-            }}
+            onPress={this.Register}
           />
         </View>
       </View>
@@ -262,4 +237,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default Register;
